@@ -17,7 +17,7 @@
     </None>
     <Content Include="Snap.Hutao.Deployment.exe">
       <Pack>true</Pack>
-      <PackagePath>runtimes\win-x64\</PackagePath>
+      <PackagePath>lib</PackagePath>
     </Content>
   </ItemGroup>
 
