@@ -7,12 +7,6 @@
     <Nullable>enable</Nullable>
     <NuSpecFile>Snap.Hutao.Deployment.Runtime.nuspec</NuSpecFile>
   </PropertyGroup>
-
-  <ItemDefinitionGroup>
-    <PackageReference>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemDefinitionGroup>
   
   <ItemGroup>
     <None Include="bin">
