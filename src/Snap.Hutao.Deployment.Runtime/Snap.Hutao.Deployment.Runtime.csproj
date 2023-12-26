@@ -6,15 +6,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NuSpecFile>Snap.Hutao.Deployment.Runtime.nuspec</NuSpecFile>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <None Include="bin">
-      <Pack>false</Pack>
-    </None>
-    <None Include="obj">
-      <Pack>false</Pack>
-    </None>
-  </ItemGroup>
 
 </Project>

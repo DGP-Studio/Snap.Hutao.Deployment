@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>Snap.Hutao.Deployment.Runtime</id>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <authors>DGP Studio</authors>
     <developmentDependency>true</developmentDependency>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -13,6 +13,6 @@
     <repository type="git" url="https://github.com/DGP-Studio/Snap.Hutao.Deployment" commit="$commit$" />
   </metadata>
   <files>
-    <file src="Snap.Hutao.Deployment.exe" target="lib/Snap.Hutao.Deployment.exe"/>
+    <file src="Snap.Hutao.Deployment.exe" target="lib/net8.0-windows/Snap.Hutao.Deployment.exe"/>
   </files>
 </package>
