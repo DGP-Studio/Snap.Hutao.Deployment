@@ -13,6 +13,6 @@
     <repository type="git" url="https://github.com/DGP-Studio/Snap.Hutao.Deployment" commit="$commit$" />
   </metadata>
   <files>
-    <file src="Snap.Hutao.Deployment.exe" target="lib/net8.0-windows/Snap.Hutao.Deployment.exe"/>
+    <file src="Snap.Hutao.Deployment.exe" target="lib/net8.0-windows10.0.22621.0/Snap.Hutao.Deployment.exe"/>
   </files>
 </package>
