@@ -15,10 +15,6 @@
     <None Include="obj">
       <Pack>false</Pack>
     </None>
-    <Content Include="Snap.Hutao.Deployment.exe">
-      <Pack>true</Pack>
-      <PackagePath>lib</PackagePath>
-    </Content>
   </ItemGroup>
 
 </Project>
