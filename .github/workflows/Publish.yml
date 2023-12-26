@@ -25,4 +25,5 @@ jobs:
       run: dotnet pack src/Snap.Hutao.Deployment.Runtime/Snap.Hutao.Deployment.Runtime.csproj
 
     - name: Publish to NuGet
+      shell: bash
       run: dotnet nuget push src/Snap.Hutao.Deployment.Runtime/bin/Release/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
