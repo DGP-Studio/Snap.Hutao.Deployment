@@ -1,0 +1,28 @@
+name: Build and Publish NuGet Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Build Tool
+      run: dotnet publish src/Snap.Hutao.Deployment/Snap.Hutao.Deployment.csproj
+
+    - name: Pack
+      run: dotnet pack src/Snap.Hutao.Deployment.Runtime/Snap.Hutao.Deployment.Runtime.csproj
+
+    - name: Publish to NuGet
+      run: dotnet nuget push src/Snap.Hutao.Deployment.Runtime/bin/Release/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}

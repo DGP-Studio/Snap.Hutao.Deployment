@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NuSpecFile>Snap.Hutao.Deployment.Runtime.nuspec</NuSpecFile>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <PackageReference>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemDefinitionGroup>
+  
+  <ItemGroup>
+    <None Include="bin">
+      <Pack>false</Pack>
+    </None>
+    <None Include="obj">
+      <Pack>false</Pack>
+    </None>
+    <Content Include="Snap.Hutao.Deployment.exe">
+      <Pack>true</Pack>
+      <PackagePath>runtimes\win-x64\</PackagePath>
+    </Content>
+  </ItemGroup>
+
+</Project>
