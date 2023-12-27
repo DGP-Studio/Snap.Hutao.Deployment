@@ -2,7 +2,6 @@
 using System.CommandLine.Invocation;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Windows.Management.Deployment;
 
@@ -31,16 +30,23 @@ internal static class Invocation
             if (isUpdateMode)
             {
                 Console.WriteLine("Exit in 10 seconds...");
-                await Task.Delay(10000);
+                await Task.Delay(10000).ConfigureAwait(false);
                 return;
             }
             else
             {
                 Console.WriteLine("Start downloading package...");
-                await DownloadPackageAsync(path);
+                await PackageDownload.DownloadPackageAsync(path).ConfigureAwait(false);
             }
         }
 
+        await Certificate.EnsureGlobalSignCodeSigningRootR45Async().ConfigureAwait(false);
+        await WindowsAppSDKDependency.EnsureAsync(path).ConfigureAwait(false);
+        await RunDeploymentCoreAsync(path, name).ConfigureAwait(false);
+    }
+
+    private static async Task RunDeploymentCoreAsync(string path, string? name)
+    {
         try
         {
             Console.WriteLine("Initializing PackageManager...");
@@ -49,7 +55,6 @@ internal static class Invocation
             {
                 ForceAppShutdown = true,
                 RetainFilesOnFailure = true,
-                StageInPlace = true,
             };
 
             Console.WriteLine("Start deploying...");
@@ -57,7 +62,10 @@ internal static class Invocation
             {
                 Console.WriteLine($"[Deploying]: State: {p.state} Progress: {p.percentage}%");
             });
-            DeploymentResult result = await packageManager.AddPackageByUriAsync(new Uri(path), addPackageOptions).AsTask(progress);
+            DeploymentResult result = await packageManager
+                .AddPackageByUriAsync(new Uri(path), addPackageOptions)
+                .AsTask(progress)
+                .ConfigureAwait(false);
 
             if (result.IsRegistered)
             {
@@ -68,7 +76,6 @@ internal static class Invocation
 
                     foreach (Windows.ApplicationModel.Package package in packageManager.FindPackages())
                     {
-                        
                         if (package is { DisplayName: "Snap Hutao", PublisherDisplayName: "DGP Studio" })
                         {
                             name = package.Id.FamilyName;
@@ -94,7 +101,7 @@ internal static class Invocation
                     Exit in 10 seconds...
                     """);
 
-                await Task.Delay(10000);
+                await Task.Delay(10000).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
@@ -106,32 +113,7 @@ internal static class Invocation
                 Exit in 10 seconds...
                 """);
 
-            await Task.Delay(10000);
-        }
-    }
-
-    private static async Task DownloadPackageAsync(string packagePath)
-    {
-        using (HttpClient httpClient = new())
-        {
-            HttpShardCopyWorkerOptions<PackageDownloadStatus> options = new()
-            {
-                HttpClient = httpClient,
-                SourceUrl = "https://api.snapgenshin.com/patch/hutao/download",
-                DestinationFilePath = packagePath,
-                StatusFactory = (bytesRead, totalBytes) => new PackageDownloadStatus(bytesRead, totalBytes),
-            };
-
-            using (HttpShardCopyWorker<PackageDownloadStatus> worker = await HttpShardCopyWorker<PackageDownloadStatus>.CreateAsync(options).ConfigureAwait(false))
-            {
-                Progress<PackageDownloadStatus> progress = new(ConsoleWriteProgress);
-                await worker.CopyAsync(progress).ConfigureAwait(false);
-            }
-        }
-
-        static void ConsoleWriteProgress(PackageDownloadStatus status)
-        {
-            Console.Write($"\r{status.ProgressDescription}");
+            await Task.Delay(10000).ConfigureAwait(false);
         }
     }
 }
