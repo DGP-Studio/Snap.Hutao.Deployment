@@ -2,6 +2,7 @@
 using System.CommandLine.Invocation;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Management.Deployment;
 
@@ -76,10 +77,21 @@ internal static class Invocation
 
                     foreach (Windows.ApplicationModel.Package package in packageManager.FindPackages())
                     {
-                        if (package is { DisplayName: "Snap Hutao", PublisherDisplayName: "DGP Studio" })
+                        try
                         {
-                            name = package.Id.FamilyName;
-                            Console.WriteLine($"Package found: {name}");
+                            if (package is { DisplayName: "Snap Hutao", PublisherDisplayName: "DGP Studio" })
+                            {
+                                name = package.Id.FamilyName;
+                                Console.WriteLine($"Package found: {name}");
+                            }
+                        }
+                        catch (COMException ex)
+                        {
+                            // ERROR_MRM_MAP_NOT_FOUND
+                            if (ex.HResult is not unchecked((int)0x80073B1F))
+                            {
+                                throw;
+                            }
                         }
                     }
                 }
