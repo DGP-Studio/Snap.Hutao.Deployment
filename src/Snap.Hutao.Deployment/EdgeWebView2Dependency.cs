@@ -1,5 +1,4 @@
-﻿using Microsoft.Web.WebView2.Core;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -12,6 +11,10 @@ internal static partial class EdgeWebView2Dependency
 {
     private const string EdgeWebView2DownloadUrl = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
 
+    private const string EdgeWebView2PerUserPath = @"HKEY_CURRENT_USER\Software\Microsoft\EdgeUpdate\Clients";
+    private const string EdgeWebView2PerMachinePath = @"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients";
+    private const string EdgeWebView2GuidKey = "{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}";
+
     public static async Task EnsureAsync(bool installWebView2, bool isUpdateMode)
     {
         if (!installWebView2 || isUpdateMode)
@@ -19,16 +22,14 @@ internal static partial class EdgeWebView2Dependency
             return;
         }
 
-        try
+        if (Registry.GetValue(EdgeWebView2PerUserPath, EdgeWebView2GuidKey, null) is not null || Registry.GetValue(EdgeWebView2PerMachinePath, EdgeWebView2GuidKey, null) is not null)
         {
-            _ = CoreWebView2Environment.GetAvailableBrowserVersionString();
             Console.WriteLine("WebView2 already installed.");
+            return;
         }
-        catch (WebView2RuntimeNotFoundException)
-        {
-            Console.WriteLine("WebView2 not found, start downloading and installing WebView2...");
-            await DownloadWebView2InstallerAndInstallAsync().ConfigureAwait(false);
-        }
+
+        Console.WriteLine("WebView2 not found, start downloading and installing WebView2...");
+        await DownloadWebView2InstallerAndInstallAsync().ConfigureAwait(false);
     }
 
     private static async Task DownloadWebView2InstallerAndInstallAsync()
