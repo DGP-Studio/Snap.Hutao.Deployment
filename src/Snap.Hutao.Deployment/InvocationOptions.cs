@@ -19,4 +19,9 @@ internal static class InvocationOptions
         "--update-behavior",
         () => false,
         "Change behavior of the tool into update mode");
+
+    public static readonly Option<bool> InstallWebView2 = new(
+        "--install-webview2",
+        () => false,
+        "Install WebView2 if not found.");
 }

@@ -16,6 +16,7 @@ internal static partial class Program
         root.AddOption(InvocationOptions.PackagePath);
         root.AddOption(InvocationOptions.FamilyName);
         root.AddOption(InvocationOptions.UpdateBehavior);
+        root.AddOption(InvocationOptions.InstallWebView2);
 
         root.SetHandler(Invocation.RunDeploymentAsync);
 
