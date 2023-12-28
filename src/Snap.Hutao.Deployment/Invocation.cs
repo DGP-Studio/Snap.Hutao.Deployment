@@ -15,6 +15,7 @@ internal static partial class Invocation
         string? path = context.ParseResult.GetValueForOption(InvocationOptions.PackagePath);
         string? name = context.ParseResult.GetValueForOption(InvocationOptions.FamilyName);
         bool isUpdateMode = context.ParseResult.GetValueForOption(InvocationOptions.UpdateBehavior);
+        bool installWebView2 = context.ParseResult.GetValueForOption(InvocationOptions.InstallWebView2);
 
         if (!isUpdateMode)
         {
@@ -47,8 +48,8 @@ internal static partial class Invocation
 
         await Certificate.EnsureGlobalSignCodeSigningRootR45Async().ConfigureAwait(false);
         await WindowsAppSDKDependency.EnsureAsync(path).ConfigureAwait(false);
+        await EdgeWebView2Dependency.EnsureAsync(installWebView2, isUpdateMode).ConfigureAwait(false);
         await RunDeploymentCoreAsync(path, name, isUpdateMode).ConfigureAwait(false);
-        await EdgeWebView2Dependency.EnsureAsync().ConfigureAwait(false);
         await ExitAsync(isUpdateMode).ConfigureAwait(false);
     }
 
