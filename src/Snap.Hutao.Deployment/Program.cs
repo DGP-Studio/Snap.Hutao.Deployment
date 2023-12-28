@@ -1,9 +1,10 @@
 ﻿using System.CommandLine;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Snap.Hutao.Deployment;
 
-internal static class Program
+internal static partial class Program
 {
     internal static async Task<int> Main(string[] args)
     {

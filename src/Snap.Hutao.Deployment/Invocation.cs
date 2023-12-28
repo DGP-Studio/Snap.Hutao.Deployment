@@ -8,13 +8,18 @@ using Windows.Management.Deployment;
 
 namespace Snap.Hutao.Deployment;
 
-internal static class Invocation
+internal static partial class Invocation
 {
     public static async Task RunDeploymentAsync(InvocationContext context)
     {
         string? path = context.ParseResult.GetValueForOption(InvocationOptions.PackagePath);
         string? name = context.ParseResult.GetValueForOption(InvocationOptions.FamilyName);
         bool isUpdateMode = context.ParseResult.GetValueForOption(InvocationOptions.UpdateBehavior);
+
+        if (!isUpdateMode)
+        {
+            AllocConsole();
+        }
 
         ArgumentException.ThrowIfNullOrEmpty(path);
 
@@ -30,8 +35,7 @@ internal static class Invocation
 
             if (isUpdateMode)
             {
-                Console.WriteLine("Exit in 10 seconds...");
-                await Task.Delay(10000).ConfigureAwait(false);
+                await ExitAsync(true).ConfigureAwait(false);
                 return;
             }
             else
@@ -43,10 +47,11 @@ internal static class Invocation
 
         await Certificate.EnsureGlobalSignCodeSigningRootR45Async().ConfigureAwait(false);
         await WindowsAppSDKDependency.EnsureAsync(path).ConfigureAwait(false);
-        await RunDeploymentCoreAsync(path, name).ConfigureAwait(false);
+        await RunDeploymentCoreAsync(path, name, isUpdateMode).ConfigureAwait(false);
+        await ExitAsync(isUpdateMode).ConfigureAwait(false);
     }
 
-    private static async Task RunDeploymentCoreAsync(string path, string? name)
+    private static async Task RunDeploymentCoreAsync(string path, string? name, bool isUpdateMode)
     {
         try
         {
@@ -109,11 +114,7 @@ internal static class Invocation
                     ActivityId: {result.ActivityId}
                     ExtendedErrorCode: {result.ExtendedErrorCode}
                     ErrorText: {result.ErrorText}
-
-                    Exit in 10 seconds...
                     """);
-
-                await Task.Delay(10000).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
@@ -121,11 +122,30 @@ internal static class Invocation
             Console.WriteLine($"""
                 Exception occured:
                 {ex}
-
-                Exit in 10 seconds...
                 """);
+        }
+    }
 
+    private static async ValueTask ExitAsync(bool isUpdateMode)
+    {
+        if (!isUpdateMode)
+        {
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+            FreeConsole();
+        }
+        else
+        {
+            Console.WriteLine("Exit in 10 seconds...");
             await Task.Delay(10000).ConfigureAwait(false);
         }
     }
+
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool AllocConsole();
+
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool FreeConsole();
 }
