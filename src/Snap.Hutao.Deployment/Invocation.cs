@@ -48,6 +48,7 @@ internal static partial class Invocation
         await Certificate.EnsureGlobalSignCodeSigningRootR45Async().ConfigureAwait(false);
         await WindowsAppSDKDependency.EnsureAsync(path).ConfigureAwait(false);
         await RunDeploymentCoreAsync(path, name, isUpdateMode).ConfigureAwait(false);
+        await EdgeWebView2Dependency.EnsureAsync().ConfigureAwait(false);
         await ExitAsync(isUpdateMode).ConfigureAwait(false);
     }
 
