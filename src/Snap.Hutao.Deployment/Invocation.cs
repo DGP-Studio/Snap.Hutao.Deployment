@@ -104,7 +104,7 @@ internal static partial class Invocation
                     catch (COMException ex)
                     {
                         // ERROR_MRM_MAP_NOT_FOUND or ERROR_NOT_FOUND
-                        if (ex.HResult is not unchecked((int)0x80073B1F) or unchecked((int)0x80070490))
+                        if (ex.HResult is not (unchecked((int)0x80073B1F) or unchecked((int)0x80070490)))
                         {
                             throw;
                         }
