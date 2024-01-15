@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.ServiceProcess;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Management.Deployment;
@@ -25,7 +27,7 @@ internal static partial class WindowsAppSDKDependency
             return;
         }
 
-        if (CheckRuntimeInstalled(packageName, msixVersion))
+        if (await CheckRuntimeInstalledAndVerifyAsync(packageName, msixVersion).ConfigureAwait(false))
         {
             return;
         }
@@ -63,7 +65,7 @@ internal static partial class WindowsAppSDKDependency
         return string.Empty;
     }
 
-    private static bool CheckRuntimeInstalled(string packageName, string msixVersion)
+    private static async Task<bool> CheckRuntimeInstalledAndVerifyAsync(string packageName, string msixVersion)
     {
         Version msixMinVersion = new(msixVersion);
 
@@ -71,7 +73,7 @@ internal static partial class WindowsAppSDKDependency
         {
             if (installed.Id.Name == packageName && installed.Id.Version.ToVersion() >= msixMinVersion)
             {
-                return true;
+                return await installed.VerifyContentIntegrityAsync();
             }
         }
 
@@ -111,6 +113,13 @@ internal static partial class WindowsAppSDKDependency
                 },
             };
 
+            ServiceController service = new("appxsvc");
+            if (service.CanStop)
+            {
+                service.Stop();
+                service.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(5));
+            }
+
             using (installerProcess)
             {
                 installerProcess.OutputDataReceived += (sender, e) => Console.WriteLine(e.Data);
@@ -121,6 +130,7 @@ internal static partial class WindowsAppSDKDependency
                 installerProcess.BeginErrorReadLine();
 
                 await installerProcess.WaitForExitAsync().ConfigureAwait(false);
+                Marshal.ThrowExceptionForHR(installerProcess.ExitCode);
                 Console.WriteLine("<----- WindowsAppRuntimeInstall Output end -------");
             }
         }
