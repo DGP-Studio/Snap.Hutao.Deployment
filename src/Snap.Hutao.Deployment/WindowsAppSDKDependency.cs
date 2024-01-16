@@ -1,7 +1,9 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
@@ -69,15 +71,17 @@ internal static partial class WindowsAppSDKDependency
     {
         Version msixMinVersion = new(msixVersion);
 
+        List<bool> results = [];
+
         foreach (Windows.ApplicationModel.Package installed in new PackageManager().FindPackages())
         {
             if (installed.Id.Name == packageName && installed.Id.Version.ToVersion() >= msixMinVersion)
             {
-                return await installed.VerifyContentIntegrityAsync();
+                results.Add(await installed.VerifyContentIntegrityAsync());
             }
         }
 
-        return false;
+        return results.Aggregate((result, element) => result || element);
     }
 
     private static async Task DownloadWindowsAppRuntimeInstallAndInstallAsync(string version)
@@ -102,6 +106,23 @@ internal static partial class WindowsAppSDKDependency
                 }
             }
 
+            ServiceController serviceController = new("appxsvc");
+            if (serviceController.CanStop)
+            {
+                Console.WriteLine("Stopping AppxSvc...");
+                serviceController.Stop();
+                serviceController.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(5));
+
+                if (serviceController.Status is not ServiceControllerStatus.Stopped)
+                {
+                    Console.WriteLine("Can not stop AppxSvc, timeout...");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Can not stop AppxSvc, disallowed...");
+            }
+
             Console.WriteLine("Start installing SDK...");
             Process installerProcess = new()
             {
@@ -113,25 +134,18 @@ internal static partial class WindowsAppSDKDependency
                 },
             };
 
-            ServiceController service = new("appxsvc");
-            if (service.CanStop)
-            {
-                service.Stop();
-                service.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(5));
-            }
-
             using (installerProcess)
             {
                 installerProcess.OutputDataReceived += (sender, e) => Console.WriteLine(e.Data);
                 installerProcess.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
                 installerProcess.Start();
-                Console.WriteLine("-----> WindowsAppRuntimeInstall Output begin -----");
+                Console.WriteLine("-----> WindowsAppRuntimeInstall Output begin");
                 installerProcess.BeginOutputReadLine();
                 installerProcess.BeginErrorReadLine();
 
                 await installerProcess.WaitForExitAsync().ConfigureAwait(false);
                 Marshal.ThrowExceptionForHR(installerProcess.ExitCode);
-                Console.WriteLine("<----- WindowsAppRuntimeInstall Output end -------");
+                Console.WriteLine("<----- WindowsAppRuntimeInstall Output end");
             }
         }
         finally

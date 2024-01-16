@@ -134,7 +134,10 @@ internal static partial class Invocation
         if (!isUpdateMode)
         {
             Console.WriteLine("Press enter to exit...");
-            while (Console.ReadKey(true).Key != ConsoleKey.Enter) ;
+            while (Console.ReadKey(true).Key != ConsoleKey.Enter)
+            {
+                //Pending enter key
+            }
             FreeConsole();
         }
         else
