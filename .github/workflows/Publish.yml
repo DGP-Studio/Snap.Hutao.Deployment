@@ -18,9 +18,6 @@ jobs:
       with:
         dotnet-version: '8.x'
 
-    - name: Build Tool
-      run: dotnet publish src/Snap.Hutao.Deployment/Snap.Hutao.Deployment.csproj
-
     - name: Pack
       run: dotnet pack src/Snap.Hutao.Deployment.Runtime/Snap.Hutao.Deployment.Runtime.csproj
 
