@@ -81,7 +81,7 @@ internal static partial class WindowsAppSDKDependency
             }
         }
 
-        return results.Aggregate((result, element) => result || element);
+        return results.Count > 0 && results.Aggregate((result, element) => result || element);
     }
 
     private static async Task DownloadWindowsAppRuntimeInstallAndInstallAsync(string version)
