@@ -19,11 +19,36 @@ internal static partial class WindowsAppSDKDependency
 
     public static async Task EnsureAsync(string packagePath)
     {
-        using FileStream packageStream = File.OpenRead(packagePath);
-        ZipArchive package = default!;
         try
         {
-            package = new(packageStream, ZipArchiveMode.Read);
+            using (FileStream packageStream = File.OpenRead(packagePath))
+            {
+                using (ZipArchive package = new(packageStream, ZipArchiveMode.Read))
+                {
+                    (string packageName, string msixVersion) = await ExtractRuntimePackageNameAndMsixMinVersionFromAppManifestAsync(package).ConfigureAwait(false);
+                    if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(msixVersion))
+                    {
+                        Console.WriteLine("No Windows App Runtime version found in Msix/AppxManifest.xml");
+                        return;
+                    }
+
+                    if (await CheckRuntimeInstalledAndVerifyAsync(packageName, msixVersion).ConfigureAwait(false))
+                    {
+                        return;
+                    }
+
+                    string sdkVersion = await ExtractSDKVersionFromDepsJsonAsync(package).ConfigureAwait(false);
+
+                    if (string.IsNullOrEmpty(sdkVersion))
+                    {
+                        Console.WriteLine("No Windows App SDK version found in Msix/Snap.Hutao.deps.json");
+                        return;
+                    }
+
+                    Console.WriteLine("Start downloading SDK installer...");
+                    await DownloadWindowsAppRuntimeInstallAndInstallAsync(sdkVersion).ConfigureAwait(false);
+                };
+            }
         }
         catch (InvalidDataException)
         {
@@ -38,32 +63,6 @@ internal static partial class WindowsAppSDKDependency
 
             throw;
         }
-
-        using (package)
-        {
-            (string packageName, string msixVersion) = await ExtractRuntimePackageNameAndMsixMinVersionFromAppManifestAsync(package).ConfigureAwait(false);
-            if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(msixVersion))
-            {
-                Console.WriteLine("No Windows App Runtime version found in Msix/AppxManifest.xml");
-                return;
-            }
-
-            if (await CheckRuntimeInstalledAndVerifyAsync(packageName, msixVersion).ConfigureAwait(false))
-            {
-                return;
-            }
-
-            string sdkVersion = await ExtractSDKVersionFromDepsJsonAsync(package).ConfigureAwait(false);
-
-            if (string.IsNullOrEmpty(sdkVersion))
-            {
-                Console.WriteLine("No Windows App SDK version found in Msix/Snap.Hutao.deps.json");
-                return;
-            }
-
-            Console.WriteLine("Start downloading SDK installer...");
-            await DownloadWindowsAppRuntimeInstallAndInstallAsync(sdkVersion).ConfigureAwait(false);
-        };
     }
 
     private static async Task<string> ExtractSDKVersionFromDepsJsonAsync(ZipArchive package)

@@ -2,6 +2,7 @@
 using System.CommandLine.Invocation;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Management.Deployment;
@@ -24,30 +25,30 @@ internal static partial class Invocation
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         Console.WriteLine($"""
-            Snap Hutao Deployment Tool [1.15.2]
+            Snap Hutao Deployment Tool [1.15.3]
             PackagePath: {path}
             FamilyName: {name}
             ------------------------------------------------------------
             """);
 
-        if (!File.Exists(path))
-        {
-            Console.WriteLine($"Package file not found.");
-
-            if (isUpdateMode)
-            {
-                await ExitAsync(true).ConfigureAwait(false);
-                return;
-            }
-            else
-            {
-                Console.WriteLine("Start downloading package...");
-                await PackageDownload.DownloadPackageAsync(path).ConfigureAwait(false);
-            }
-        }
-
         try
         {
+            if (!File.Exists(path))
+            {
+                Console.WriteLine($"Package file not found.");
+
+                if (isUpdateMode)
+                {
+                    await ExitAsync(true).ConfigureAwait(false);
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine("Start downloading package...");
+                    await PackageDownload.DownloadPackageAsync(path).ConfigureAwait(false);
+                }
+            }
+
             await Certificate.EnsureGlobalSignCodeSigningRootR45Async().ConfigureAwait(false);
             await WindowsAppSDKDependency.EnsureAsync(path).ConfigureAwait(false);
             await RunDeploymentCoreAsync(path, name, isUpdateMode).ConfigureAwait(false);
