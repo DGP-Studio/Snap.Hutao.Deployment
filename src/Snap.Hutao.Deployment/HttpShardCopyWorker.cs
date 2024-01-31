@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Security.Isolation;
 
 namespace Snap.Hutao.Deployment;
 
@@ -55,7 +56,12 @@ internal sealed class HttpShardCopyWorker<TStatus> : IDisposable
     public Task CopyAsync(IProgress<TStatus> progress, CancellationToken token = default)
     {
         ShardProgress shardProgress = new(progress, statusFactory, contentLength);
-        return Parallel.ForEachAsync(shards, token, (shard, token) => CopyShardAsync(shard, shardProgress, token));
+        ParallelOptions options = new()
+        {
+            MaxDegreeOfParallelism = Math.Clamp(2, Environment.ProcessorCount, 6),
+            CancellationToken = token,
+        };
+        return Parallel.ForEachAsync(shards, options, (shard, token) => CopyShardAsync(shard, shardProgress, token));
 
         async ValueTask CopyShardAsync(Shard shard, IProgress<ShardStatus> progress, CancellationToken token)
         {
