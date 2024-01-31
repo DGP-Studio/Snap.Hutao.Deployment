@@ -20,30 +20,50 @@ internal static partial class WindowsAppSDKDependency
     public static async Task EnsureAsync(string packagePath)
     {
         using FileStream packageStream = File.OpenRead(packagePath);
-        using ZipArchive package = new(packageStream, ZipArchiveMode.Read);
-
-        (string packageName, string msixVersion) = await ExtractRuntimePackageNameAndMsixMinVersionFromAppManifestAsync(package).ConfigureAwait(false);
-        if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(msixVersion))
+        ZipArchive package = default!;
+        try
         {
-            Console.WriteLine("No Windows App Runtime version found in Msix/AppxManifest.xml");
-            return;
+            package = new(packageStream, ZipArchiveMode.Read);
+        }
+        catch (InvalidDataException)
+        {
+            Console.WriteLine("Msix Package corrupted, please re-launch Deployment and try again");
+            try
+            {
+                File.Delete(packagePath);
+            }
+            catch
+            {
+            }
+
+            throw;
         }
 
-        if (await CheckRuntimeInstalledAndVerifyAsync(packageName, msixVersion).ConfigureAwait(false))
+        using (package)
         {
-            return;
-        }
+            (string packageName, string msixVersion) = await ExtractRuntimePackageNameAndMsixMinVersionFromAppManifestAsync(package).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(packageName) || string.IsNullOrEmpty(msixVersion))
+            {
+                Console.WriteLine("No Windows App Runtime version found in Msix/AppxManifest.xml");
+                return;
+            }
 
-        string sdkVersion = await ExtractSDKVersionFromDepsJsonAsync(package).ConfigureAwait(false);
+            if (await CheckRuntimeInstalledAndVerifyAsync(packageName, msixVersion).ConfigureAwait(false))
+            {
+                return;
+            }
 
-        if (string.IsNullOrEmpty(sdkVersion))
-        {
-            Console.WriteLine("No Windows App SDK version found in Msix/Snap.Hutao.deps.json");
-            return;
-        }
+            string sdkVersion = await ExtractSDKVersionFromDepsJsonAsync(package).ConfigureAwait(false);
 
-        Console.WriteLine("Start downloading SDK installer...");
-        await DownloadWindowsAppRuntimeInstallAndInstallAsync(sdkVersion).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(sdkVersion))
+            {
+                Console.WriteLine("No Windows App SDK version found in Msix/Snap.Hutao.deps.json");
+                return;
+            }
+
+            Console.WriteLine("Start downloading SDK installer...");
+            await DownloadWindowsAppRuntimeInstallAndInstallAsync(sdkVersion).ConfigureAwait(false);
+        };
     }
 
     private static async Task<string> ExtractSDKVersionFromDepsJsonAsync(ZipArchive package)
