@@ -58,7 +58,7 @@ internal sealed class HttpShardCopyWorker<TStatus> : IDisposable
         ShardProgress shardProgress = new(progress, statusFactory, contentLength);
         ParallelOptions options = new()
         {
-            MaxDegreeOfParallelism = Math.Clamp(2, Environment.ProcessorCount, 6),
+            MaxDegreeOfParallelism = Math.Clamp(Environment.ProcessorCount, 2, 6),
             CancellationToken = token,
         };
         return Parallel.ForEachAsync(shards, options, (shard, token) => CopyShardAsync(shard, shardProgress, token));
