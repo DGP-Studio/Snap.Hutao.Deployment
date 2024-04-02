@@ -25,7 +25,7 @@ internal static partial class Invocation
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         Console.WriteLine($"""
-            Snap Hutao Deployment Tool [1.15.3]
+            Snap Hutao Deployment Tool [1.16.0]
             PackagePath: {path}
             FamilyName: {name}
             ------------------------------------------------------------
@@ -35,7 +35,10 @@ internal static partial class Invocation
         {
             if (!File.Exists(path))
             {
-                Console.WriteLine($"Package file not found.");
+                Console.WriteLine("""
+                    未找到包文件。
+                    Package file not found.
+                    """);
 
                 if (isUpdateMode)
                 {
@@ -44,13 +47,15 @@ internal static partial class Invocation
                 }
                 else
                 {
-                    Console.WriteLine("Start downloading package...");
+                    Console.WriteLine("""
+                        开始下载包文件...
+                        Start downloading package...
+                        """);
                     await PackageDownload.DownloadPackageAsync(path).ConfigureAwait(false);
                 }
             }
 
             await Certificate.EnsureGlobalSignCodeSigningRootR45Async().ConfigureAwait(false);
-            await WindowsAppSDKDependency.EnsureAsync(path).ConfigureAwait(false);
             await RunDeploymentCoreAsync(path, name, isUpdateMode).ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -68,7 +73,10 @@ internal static partial class Invocation
 
     private static async Task RunDeploymentCoreAsync(string path, string? name, bool isUpdateMode)
     {
-        Console.WriteLine("Initializing PackageManager...");
+        Console.WriteLine("""
+            初始化 PackageManager...
+            Initializing PackageManager...
+            """);
         PackageManager packageManager = new();
         AddPackageOptions addPackageOptions = new()
         {
@@ -76,7 +84,10 @@ internal static partial class Invocation
             RetainFilesOnFailure = true,
         };
 
-        Console.WriteLine("Start deploying...");
+        Console.WriteLine("""
+            开始部署...
+            Start deploying...
+            """);
         IProgress<DeploymentProgress> progress = new Progress<DeploymentProgress>(p =>
         {
             Console.WriteLine($"[Deploying]: State: {p.state} Progress: {p.percentage}%");
@@ -88,10 +99,16 @@ internal static partial class Invocation
 
         if (result.IsRegistered)
         {
-            Console.WriteLine("Package deployed.");
+            Console.WriteLine("""
+                包部署成功。
+                Package deployed.
+                """);
             if (string.IsNullOrEmpty(name))
             {
-                Console.WriteLine("FamilyName not provided, enumerating packages.");
+                Console.WriteLine("""
+                    未提供 FamilyName，正在枚举包。
+                    FamilyName not provided, enumerating packages.
+                    """);
 
                 foreach (Windows.ApplicationModel.Package package in packageManager.FindPackages())
                 {
@@ -114,7 +131,10 @@ internal static partial class Invocation
                 }
             }
 
-            Console.WriteLine("Starting app...");
+            Console.WriteLine("""
+                正在启动应用...
+                Starting app...
+                """);
             Process.Start(new ProcessStartInfo()
             {
                 UseShellExecute = true,
@@ -135,7 +155,10 @@ internal static partial class Invocation
     {
         if (!isUpdateMode)
         {
-            Console.WriteLine("Press enter to exit...");
+            Console.WriteLine("""
+                按下回车键退出...
+                Press enter to exit...
+                """);
             while (Console.ReadKey(true).Key != ConsoleKey.Enter)
             {
                 //Pending enter key
