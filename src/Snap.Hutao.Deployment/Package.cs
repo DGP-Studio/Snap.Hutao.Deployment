@@ -19,7 +19,7 @@ internal static class Package
         {
             using (FileStream packageStream = File.OpenRead(packagePath))
             {
-                using (ZipArchive _ = new(packageStream, ZipArchiveMode.Read))
+                using (new ZipArchive(packageStream, ZipArchiveMode.Read))
                 {
                     return true;
                 }
