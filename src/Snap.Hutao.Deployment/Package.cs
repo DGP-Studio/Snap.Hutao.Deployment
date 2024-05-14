@@ -1,11 +1,37 @@
 ﻿using System;
+using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Snap.Hutao.Deployment;
 
-internal static class PackageDownload
+internal static class Package
 {
+    public static bool EnsurePackage(string packagePath)
+    {
+        if (!File.Exists(packagePath))
+        {
+            return false;
+        }
+
+        try
+        {
+            using (FileStream packageStream = File.OpenRead(packagePath))
+            {
+                using (new ZipArchive(packageStream, ZipArchiveMode.Read))
+                {
+                    return true;
+                }
+            }
+        }
+        catch (InvalidDataException)
+        {
+            File.Delete(packagePath);
+            return false;
+        }
+    }
+
     public static async Task DownloadPackageAsync(string packagePath)
     {
         using (HttpClient httpClient = new())

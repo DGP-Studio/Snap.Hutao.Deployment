@@ -1,8 +1,6 @@
 ﻿using System;
 using System.CommandLine.Invocation;
 using System.Diagnostics;
-using System.IO;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Management.Deployment;
@@ -25,7 +23,7 @@ internal static partial class Invocation
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         Console.WriteLine($"""
-            Snap Hutao Deployment Tool [1.16.0]
+            Snap Hutao Deployment Tool [1.16.1]
             PackagePath: {path}
             FamilyName: {name}
             ------------------------------------------------------------
@@ -33,11 +31,11 @@ internal static partial class Invocation
 
         try
         {
-            if (!File.Exists(path))
+            if (!Package.EnsurePackage(path))
             {
                 Console.WriteLine("""
-                    未找到包文件。
-                    Package file not found.
+                    未找到包文件或包文件损坏。
+                    Package file not found or corrupted.
                     """);
 
                 if (isUpdateMode)
@@ -51,7 +49,7 @@ internal static partial class Invocation
                         开始下载包文件...
                         Start downloading package...
                         """);
-                    await PackageDownload.DownloadPackageAsync(path).ConfigureAwait(false);
+                    await Package.DownloadPackageAsync(path).ConfigureAwait(false);
                 }
             }
 
