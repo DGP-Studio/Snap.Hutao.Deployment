@@ -23,7 +23,7 @@ internal static partial class Invocation
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         Console.WriteLine($"""
-            Snap Hutao Deployment Tool [1.16.1]
+            Snap Hutao Deployment Tool [1.16.2]
             PackagePath: {path}
             FamilyName: {name}
             ------------------------------------------------------------

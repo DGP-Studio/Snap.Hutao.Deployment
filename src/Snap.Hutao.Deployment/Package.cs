@@ -34,20 +34,23 @@ internal static class Package
 
     public static async Task DownloadPackageAsync(string packagePath)
     {
-        using (HttpClient httpClient = new())
+        using (HttpClientHandler handler = new() { UseCookies = false })
         {
-            HttpShardCopyWorkerOptions<DownloadStatus> options = new()
+            using (HttpClient httpClient = new(handler))
             {
-                HttpClient = httpClient,
-                SourceUrl = "https://api.snapgenshin.com/patch/hutao/download",
-                DestinationFilePath = packagePath,
-                StatusFactory = (bytesRead, totalBytes) => new DownloadStatus(bytesRead, totalBytes),
-            };
+                HttpShardCopyWorkerOptions<DownloadStatus> options = new()
+                {
+                    HttpClient = httpClient,
+                    SourceUrl = "https://api.snapgenshin.com/patch/hutao/download",
+                    DestinationFilePath = packagePath,
+                    StatusFactory = (bytesRead, totalBytes) => new DownloadStatus(bytesRead, totalBytes),
+                };
 
-            using (HttpShardCopyWorker<DownloadStatus> worker = await HttpShardCopyWorker<DownloadStatus>.CreateAsync(options).ConfigureAwait(false))
-            {
-                Progress<DownloadStatus> progress = new(ConsoleWriteProgress);
-                await worker.CopyAsync(progress).ConfigureAwait(false);
+                using (HttpShardCopyWorker<DownloadStatus> worker = await HttpShardCopyWorker<DownloadStatus>.CreateAsync(options).ConfigureAwait(false))
+                {
+                    Progress<DownloadStatus> progress = new(ConsoleWriteProgress);
+                    await worker.CopyAsync(progress).ConfigureAwait(false);
+                }
             }
         }
 
