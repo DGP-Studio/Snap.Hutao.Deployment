@@ -23,7 +23,7 @@ internal static partial class Invocation
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         Console.WriteLine($"""
-            Snap Hutao Deployment Tool [1.16.3]
+            Snap Hutao Deployment Tool [1.16.4]
             PackagePath: {path}
             FamilyName: {name}
             ------------------------------------------------------------
@@ -31,7 +31,7 @@ internal static partial class Invocation
 
         try
         {
-            if (!Package.EnsurePackage(path))
+            if (!await Package.EnsurePackageAsync(path).ConfigureAwait(false))
             {
                 Console.WriteLine("""
                     未找到包文件或包文件损坏。
