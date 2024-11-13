@@ -59,22 +59,19 @@ internal static class Package
 
     public static async Task DownloadPackageAsync(string packagePath)
     {
-        using (HttpClientHandler handler = new() { UseCookies = false })
+        using (HttpClient httpClient = new(new SocketsHttpHandler() { UseCookies = false }))
         {
-            using (HttpClient httpClient = new(handler))
+            using (HttpResponseMessage responseMessage = await httpClient.GetAsync(HutaoPatchDownloadEndpoint, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
             {
-                HttpShardCopyWorkerOptions<DownloadStatus> options = new()
+                long totalBytes = responseMessage.Content.Headers.ContentLength ?? 0;
+                using (Stream stream = await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false))
                 {
-                    HttpClient = httpClient,
-                    SourceUrl = HutaoPatchDownloadEndpoint,
-                    DestinationFilePath = packagePath,
-                    StatusFactory = (bytesRead, totalBytes) => new DownloadStatus(bytesRead, totalBytes),
-                };
-
-                using (HttpShardCopyWorker<DownloadStatus> worker = await HttpShardCopyWorker<DownloadStatus>.CreateAsync(options).ConfigureAwait(false))
-                {
-                    Progress<DownloadStatus> progress = new(ConsoleWriteProgress);
-                    await worker.CopyAsync(progress).ConfigureAwait(false);
+                    using (FileStream fileStream = File.Create(packagePath))
+                    {
+                        StreamCopyWorker<DownloadStatus> worker = new(stream, fileStream, (_, bytesRead) => new DownloadStatus(bytesRead, totalBytes));
+                        Progress<DownloadStatus> progress = new(ConsoleWriteProgress);
+                        await worker.CopyAsync(progress).ConfigureAwait(false);
+                    }
                 }
             }
         }

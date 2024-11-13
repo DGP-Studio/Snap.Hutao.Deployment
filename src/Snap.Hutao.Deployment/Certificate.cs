@@ -16,7 +16,7 @@ internal static class Certificate
         using (X509Store store = new(StoreName.Root, StoreLocation.LocalMachine))
         {
             store.Open(OpenFlags.ReadWrite);
-            if (store.Certificates.Any(cert => cert.FriendlyName == CertificateName))
+            if (store.Certificates.Any(cert => cert.FriendlyName is CertificateName))
             {
                 Console.WriteLine("""
                     已找到证书 [GlobalSign Code Signing Root R45]
@@ -45,7 +45,8 @@ internal static class Certificate
                     For more security information, please visit the url down below
                     https://support.globalsign.com/ca-certificates/root-certificates/globalsign-root-certificates
                     """);
-                store.Add(new X509Certificate2(rawData));
+                
+                store.Add(X509CertificateLoader.LoadCertificate(rawData));
             }
         }
     }
