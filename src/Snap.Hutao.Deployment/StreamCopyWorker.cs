@@ -9,14 +9,6 @@ namespace Snap.Hutao.Deployment;
 
 internal delegate TStatus StreamCopyStatusFactory<out TStatus>(long bytesReadSinceLastReport, long bytesReadSinceCopyStart);
 
-internal sealed partial class StreamCopyWorker : StreamCopyWorker<StreamCopyStatus>
-{
-    public StreamCopyWorker(Stream source, Stream destination, long totalBytes, int bufferSize = 81920)
-        : base(source, destination, (lastReport, copyStart) => new StreamCopyStatus(lastReport, copyStart, totalBytes), bufferSize)
-    {
-    }
-}
-
 internal partial class StreamCopyWorker<TStatus> : IDisposable
 {
     private readonly Stream source;

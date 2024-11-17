@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,7 +21,7 @@ internal static class SHA256
 
     public static async Task<string> HashAsync(Stream stream, CancellationToken token = default)
     {
-        byte[] bytes = await System.Security.Cryptography.SHA256.HashDataAsync(stream, token).ConfigureAwait(false);
+        byte[] bytes = await CryptographicOperations.HashDataAsync(HashAlgorithmName.SHA256, stream, token).ConfigureAwait(false);
         return Convert.ToHexString(bytes);
     }
 }
