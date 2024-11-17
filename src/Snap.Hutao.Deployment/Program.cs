@@ -8,7 +8,7 @@ internal static partial class Program
     internal static async Task<int> Main(string[] args)
     {
         string description = $@"
-            Snap Hutao Updater
+            Snap Hutao Deployment Tool
             Copyright (c) DGP Studio. All rights reserved.
             ";
         RootCommand root = new(description);
