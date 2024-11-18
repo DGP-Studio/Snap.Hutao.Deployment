@@ -30,3 +30,11 @@ jobs:
         PURGE_URL: ${{ secrets.PURGE_URL }}
       run: |
         curl -X PATCH $PURGE_URL
+
+    - uses: benc-uk/workflow-dispatch@v1.2.4
+      with:
+        workflow: overwrite
+        repo: qhy040404/CN-Overwriter
+        ref: main
+        token: "${{ secrets.PAT_TOKEN }}"
+        inputs: '{ "project": "deployment" }'
