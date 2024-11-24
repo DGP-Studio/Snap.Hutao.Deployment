@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 提交 Snap Hutao 客户端问题报告 / Submit Snap Hutao Client Issues
+    url: https://github.com/DGP-Studio/Snap.Hutao/issues/new/choose
+    about: 客户端问题请点击此处跳转至主库提交 / Please click here to redirect to main repository for client issues
