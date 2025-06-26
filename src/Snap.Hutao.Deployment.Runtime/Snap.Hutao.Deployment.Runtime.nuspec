@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>Snap.Hutao.Deployment.Runtime</id>
-    <version>2.4.9</version>
+    <version>2.4.10</version>
     <authors>DGP Studio</authors>
     <developmentDependency>true</developmentDependency>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -16,6 +16,7 @@
     <file src="Snap.Hutao.Deployment.exe" target="lib/net9.0-windows10.0.26100.0/Snap.Hutao.Deployment.exe"/>
   </files>
 </package>
+
 
 
 
